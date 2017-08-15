@@ -553,9 +553,9 @@ const map = new mapboxgl.Map({
 });
 
 var mapData = function (data, targetElement) {
-    data.forEach(hotel => {
+    data.forEach((hotel, index) => {
       var temp = document.createElement('option')
-      temp.value = hotel.id
+      temp.value = index
       temp.append(hotel.name)
       targetElement.append(temp)
     })
@@ -571,32 +571,35 @@ fetch('/api/all')
     mapData(data.Hotels, selectH);
     mapData(data.Restaurants, selectR);
     mapData(data.Activities, selectA);
-    globalstore = data
+    globalstore = data;
+    console.log(data);
   })
   .catch(console.error)
 
-// var setListeners = function(addButton, selectChoices, dataset, itineraryList) {
+console.log(globalstore);
 var setListeners = function(placetype) {
   document.getElementById(placetype.toLowerCase() + '-add').addEventListener('click', () => {
     var selectedChoice = document.getElementById(placetype.toLowerCase() + '-choices').value
-    // figure out what was selected
-    var selectedObj = globalstore[placetype][selectedChoice - 1]
-    // console.log(document.getElementById(selectChoices).value)
-    // Construct an itinerary item
-      var temp = document.createElement('li')
-      temp.append(selectedObj.name)
-      document.getElementById(placetype.toLowerCase() + '-list').append(temp)
-    // Append it to the proper place in the DOM
-    // Update the map
-      // const buildMarker = (type, coords) => {
-        var newmarker = buildMarker(placetype.toLowerCase(), selectedObj.place.location)
-        newmarker.addTo(map)
+    var selectedObj = globalstore[placetype][selectedChoice]
+    var temp = document.createElement('li')
+    temp.className = 'list-group-item';
+    var button = document.createElement('button');
+    button.append('x');
+    button.className = 'btn btn-sm btn-danger pull-right';
+    temp.append(selectedObj.name)
+    temp.append(button);
+    document.getElementById(placetype.toLowerCase() + '-list').append(temp)
+    var newmarker = buildMarker(placetype.toLowerCase(), selectedObj.place.location)
+    newmarker.addTo(map)
+    button.onclick = function(){
+      temp.remove();
+      newmarker.remove();
+      map.flyTo({center: selectedObj.place.location, zoom: 13, curve: 2, speed: 0.5});
+    }
+    map.flyTo({center: selectedObj.place.location, zoom: 15, curve: 2, speed: 0.5});
   })
 }
 
-// setListeners('hotels-add', 'hotels-choices', 'Hotels', 'hotels-list')
-// setListeners('restaurants-add', 'restaurants-choices', 'Restaurants', 'restaurants-list')
-// setListeners('activities-add', 'activities-choices', 'Activities', 'activities-list')
 setListeners('Hotels')
 setListeners('Restaurants')
 setListeners('Activities')
