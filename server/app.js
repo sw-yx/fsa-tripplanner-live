@@ -3,6 +3,7 @@ const app = express();
 const path = require('path');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const api = require('./route');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -16,6 +17,8 @@ app.get('/', function (req, res, next){
 	}
 })
 
+app.use('/api', api)
+
 app.use(function(req, res, next) {
   var err = new Error('Not Found');
   err.status = 404;
@@ -28,6 +31,6 @@ app.use(function(err, req, res, next){
 	res.send(err);
 })
 
-app.listen(3001, function(){
+app.listen(1337, function(){
 	console.log('running..');
 })

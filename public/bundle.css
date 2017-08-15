@@ -6942,4 +6942,7 @@ h3 {
   #day-title > .remove {
     margin-left: 1em; }
 
+.list-group {
+  list-style: none; }
+
 /*# sourceMappingURL=bundle.css.map*/
