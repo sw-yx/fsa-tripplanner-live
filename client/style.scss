@@ -194,3 +194,21 @@ h3 {
 .list-group {
   list-style: none
 }
+
+// https://www.mapbox.com/mapbox-gl-js/example/setstyle/
+    #menu {
+        position: absolute;
+        float: left;
+        background: #fff;
+        padding: 10px;
+        font-family: 'Open Sans', sans-serif;
+        z-index: 99
+    }
+    .mapboxgl-popup {
+        max-width: 400px;
+        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    }
+    .reallysmallbtn {
+      padding: 0px 5px;
+      border-radius: 50%
+    }

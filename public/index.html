@@ -4,6 +4,7 @@
 <head>
   <title>Trip Planner</title>
   <link rel="stylesheet" href="./bundle.css">
+  <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.39.1/mapbox-gl.css' rel='stylesheet' />
   <script src="./bundle.js" defer></script>
 </head>
 
@@ -29,7 +30,23 @@
   <div id="app" class="clearfix">
     <div class="map-container col-sm-8 col-lg-9">
       <div>
-        <div id="map-canvas"></div>
+        <div id="map-canvas">
+          <div id='menu'>
+              <input id='basic' type='radio' name='rtoggle' value='basic' checked='checked'>
+              <label for='basic'>basic</label>
+              <input id='streets' type='radio' name='rtoggle' value='streets'>
+              <label for='streets'>streets</label>
+              <input id='bright' type='radio' name='rtoggle' value='bright'>
+              <label for='bright'>bright</label>
+              <input id='light' type='radio' name='rtoggle' value='light'>
+              <label for='light'>light</label>
+              <input id='dark' type='radio' name='rtoggle' value='dark'>
+              <label for='dark'>dark</label>
+              <input id='satellite' type='radio' name='rtoggle' value='satellite'>
+              <label for='satellite'>satellite</label>
+          </div>
+        </div>
+        
       </div>
     </div>
     <div id="control-panel" class="col-sm-4 col-lg-3 clearfix">
