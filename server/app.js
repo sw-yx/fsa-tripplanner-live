@@ -31,6 +31,6 @@ app.use(function(err, req, res, next){
 	res.send(err);
 })
 
-app.listen(1337, function(){
+app.listen(process.env.PORT || 1337, function(){
 	console.log('running..');
 })

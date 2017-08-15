@@ -7,4 +7,6 @@ const config = {
 
 const Sequelize = require('sequelize');
 
-module.exports = new Sequelize(config.database, config.username, config.password, config);
+module.exports = process.env.DATABASE_URL ? 
+  new Sequelize(process.env.DATABASE_URL, config) :
+  new Sequelize(config.database, config.username, config.password, config);
