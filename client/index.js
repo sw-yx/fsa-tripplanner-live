@@ -14,7 +14,7 @@ const map = new mapboxgl.Map({
   bearing: 20,
   style: "mapbox://styles/mapbox/streets-v10"
 });
-
+map.addControl(new mapboxgl.NavigationControl());
 var mapData = function (data, targetElement) {
     data.forEach((hotel, index) => {
       var temp = document.createElement('option')
