@@ -27,5 +27,8 @@
     "sass-loader": "^6.0.6",
     "url-loader": "^0.5.9",
     "webpack": "^3.5.3"
+  },
+  "engines": {
+    "node": "8.4.0"
   }
 }
