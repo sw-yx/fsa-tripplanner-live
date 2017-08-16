@@ -1,7 +1,12 @@
-function State() {
+function State(preset) {
     this.hotels = []
     this.restaurants = []
     this.activities = []
+    if(preset) {
+        this.hotels = preset.hotels;
+        this.restaurants = preset.restaurants;
+        this.activities = preset.activities;
+    }
 }
 
 State.prototype.addPlace = function (varname, placeId) {
@@ -22,9 +27,15 @@ State.prototype.clearState = function (){
     this.activities = []
 }
 
-function Plan() {
+function Plan(preset) {
     this.days = [new State()]
     this.currentday = 0
+    if(preset) {
+        this.days = []
+        preset.forEach(value => {
+            this.days.push(new State(value));
+        })
+    }
 }
 
 Plan.prototype.addPlaceToCurrentDay = function (varname, placeId) {

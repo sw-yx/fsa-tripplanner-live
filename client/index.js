@@ -27,10 +27,28 @@ var mapData = function (data, targetElement) {
     })
 }
 var globalstore = {}
-var plan = new Plan()
+var plan
+
+if(!location.hash) {
+  plan = new Plan()
+  goFetch()
+  .then(() => {
+      renderPlan();
+  })
+} else {
+  fetch('api/itineraries/' + location.hash.slice(1))
+  .then(result => result.json())
+  .then(async function(result) {
+    plan = new Plan(result.Itineraries.days)
+    await goFetch();
+    renderPlan();
+  });
+}
+
 var currentmarkers = []
 
-fetch('/api/all')
+function goFetch (){
+  return fetch('/api/all')
   .then(result => result.json())
   .then(data => { // data = { Hotels, Restaurants, Activities }
     mapData(data.Hotels, el('hotels-choices'));
@@ -39,6 +57,7 @@ fetch('/api/all')
     globalstore = data;
   })
   .catch(console.error)
+}
 
 function addPlaceDiv(selectedChoice, Placetype){
     var placetype = Placetype.toLowerCase()
@@ -109,7 +128,28 @@ function renderPlan(){
   })
   renderDay(plan.getCurDay());
 }
-renderPlan()
+
+el('saveField').addEventListener('keyup', e => {
+  if(e.code === 'Enter'){
+    var data = JSON.stringify({
+      name: e.target.value,
+      plan: plan
+    });
+    fetch("/api/itineraries",
+      {
+        method: "POST",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: data
+      }).then(response => response.json())
+      .then(savedname => {
+        el('submitField').innerHTML = 'saved to ' + location.origin + '#' + savedname.name
+        location.hash = savedname.name
+      })
+  }
+})
 
 //enable add day button
 el('day-add').addEventListener('click', () => {

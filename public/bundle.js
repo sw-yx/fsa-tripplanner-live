@@ -564,10 +564,28 @@ var mapData = function (data, targetElement) {
     })
 }
 var globalstore = {}
-var plan = new Plan()
+var plan
+
+if(!location.hash) {
+  plan = new Plan()
+  goFetch()
+  .then(() => {
+      renderPlan();
+  })
+} else {
+  fetch('api/itineraries/' + location.hash.slice(1))
+  .then(result => result.json())
+  .then(async function(result) {
+    plan = new Plan(result.Itineraries.days)
+    await goFetch();
+    renderPlan();
+  });
+}
+
 var currentmarkers = []
 
-fetch('/api/all')
+function goFetch (){
+  return fetch('/api/all')
   .then(result => result.json())
   .then(data => { // data = { Hotels, Restaurants, Activities }
     mapData(data.Hotels, el('hotels-choices'));
@@ -576,6 +594,7 @@ fetch('/api/all')
     globalstore = data;
   })
   .catch(console.error)
+}
 
 function addPlaceDiv(selectedChoice, Placetype){
     var placetype = Placetype.toLowerCase()
@@ -646,7 +665,28 @@ function renderPlan(){
   })
   renderDay(plan.getCurDay());
 }
-renderPlan()
+
+el('saveField').addEventListener('keyup', e => {
+  if(e.code === 'Enter'){
+    var data = JSON.stringify({
+      name: e.target.value,
+      plan: plan
+    });
+    fetch("/api/itineraries",
+      {
+        method: "POST",
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: data
+      }).then(response => response.json())
+      .then(savedname => {
+        el('submitField').innerHTML = 'saved to ' + location.origin + '#' + savedname.name
+        location.hash = savedname.name
+      })
+  }
+})
 
 //enable add day button
 el('day-add').addEventListener('click', () => {
@@ -763,10 +803,15 @@ module.exports = makePopup
 /* 6 */
 /***/ (function(module, exports) {
 
-function State() {
+function State(preset) {
     this.hotels = []
     this.restaurants = []
     this.activities = []
+    if(preset) {
+        this.hotels = preset.hotels;
+        this.restaurants = preset.restaurants;
+        this.activities = preset.activities;
+    }
 }
 
 State.prototype.addPlace = function (varname, placeId) {
@@ -787,9 +832,15 @@ State.prototype.clearState = function (){
     this.activities = []
 }
 
-function Plan() {
+function Plan(preset) {
     this.days = [new State()]
     this.currentday = 0
+    if(preset) {
+        this.days = []
+        preset.forEach(value => {
+            this.days.push(new State(value));
+        })
+    }
 }
 
 Plan.prototype.addPlaceToCurrentDay = function (varname, placeId) {

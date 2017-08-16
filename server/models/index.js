@@ -18,11 +18,6 @@ const Itinerary = db.define('itinerary', {
 Hotel.belongsTo(Place);
 Restaurant.belongsTo(Place);
 Activity.belongsTo(Place);
-// Day.belongsToMany(Hotel, {through: 'itinerary_hotel'});
-// Day.belongsToMany(Restaurant, {through: 'itinerary_restaurant'});
-// Day.belongsToMany(Activity, {through: 'itinerary_activity'});
-// Day.belongsTo(Itinerary)
-// Itinerary.Days = Itinerary.hasMany(Day);
 Itinerary.hasMany(Day);
 
 module.exports = {
