@@ -29,36 +29,27 @@ var el = x => document.getElementById(x)
 
 fetch('/api/all')
   .then(result => result.json())
-  .then(data => {
-    // data = { Hotels, Restaurants, Activities }
-    var selectH = el('hotels-choices');
-    var selectR = el('restaurants-choices');
-    var selectA = el('activities-choices');
-    mapData(data.Hotels, selectH);
-    mapData(data.Restaurants, selectR);
-    mapData(data.Activities, selectA);
+  .then(data => { // data = { Hotels, Restaurants, Activities }
+    mapData(data.Hotels, el('hotels-choices'));
+    mapData(data.Restaurants, el('restaurants-choices'));
+    mapData(data.Activities, el('activities-choices'));
     globalstore = data;
   })
   .catch(console.error)
 
 var makePopupHTML = (placetype, selectedObj) => {
+    var popupHTML = `<h3>${selectedObj.name}</h3>`;
+    popupHTML += `<p>Address: ${selectedObj.place.address}</p>`;
     switch (placetype) {
       case 'Hotels':
-        var popupHTML = `<h3>${selectedObj.name}</h3>`;
-        popupHTML += `<p>Address: ${selectedObj.place.address}</p>`;
         popupHTML += `<p>Stars: ${selectedObj.num_stars}</p>`;
         popupHTML += `<p>Amenities: ${selectedObj.amenities}</p>`;
         break;
       case 'Restaurants':
-        var popupHTML = `<h3>${selectedObj.name}</h3>`;
-        popupHTML += `<p>Address: ${selectedObj.place.address}</p>`;
         popupHTML += `<p>Cuisine: ${selectedObj.cuisine}</p>`;
         popupHTML += `<p>Price: ${Array(selectedObj.price).join('$')}$</p>`;
-        popupHTML += `<p>Address: ${selectedObj.place.address}</p>`;
         break;
       default: // Activities
-        var popupHTML = `<h3>${selectedObj.name}</h3>`;
-        popupHTML += `<p>Address: ${selectedObj.place.address}</p>`;
         popupHTML += `<p>Age Range: ${selectedObj.age_range}</p>`;
         break;
     }
@@ -74,31 +65,28 @@ var setListeners = function(placetype) {
     var button = document.createElement('button');
     button.append('x');
     button.className = 'btn btn-sm btn-danger pull-right reallysmallbtn';
-    temp.append(selectedObj.name)
+    temp.append(selectedObj.name);
     temp.append(button);
     el(placetype.toLowerCase() + '-list').append(temp)
     var newmarker = buildMarker(placetype.toLowerCase(), selectedObj.place.location)
+    // make popup
     var popup = new mapboxgl.Popup({offset: 25})
         .setHTML(makePopupHTML(placetype, selectedObj))
     newmarker.setPopup(popup)
     newmarker.addTo(map)
+    // make removal possible
     button.onclick = function(){
       temp.remove();
       newmarker.remove();
       map.flyTo({center: selectedObj.place.location, zoom: 13, curve: 2, speed: 0.5});
     }
-
     //fly to the new marker once done
     map.flyTo({center: selectedObj.place.location, zoom: 15, curve: 2, speed: 0.5});
   })
 }
+['Hotels', 'Restaurants', 'Activities'].forEach(x => setListeners(x))
 
-setListeners('Hotels')
-setListeners('Restaurants')
-setListeners('Activities')
-
-
-// https://www.mapbox.com/mapbox-gl-js/example/setstyle/
+// START https://www.mapbox.com/mapbox-gl-js/example/setstyle/
 var layerList = document.getElementById('menu');
 var inputs = layerList.getElementsByTagName('input');
 
@@ -110,4 +98,4 @@ function switchLayer(layer) {
 for (var i = 0; i < inputs.length; i++) {
     inputs[i].onclick = switchLayer;
 }
-// https://www.mapbox.com/mapbox-gl-js/example/setstyle/
+// END https://www.mapbox.com/mapbox-gl-js/example/setstyle/
