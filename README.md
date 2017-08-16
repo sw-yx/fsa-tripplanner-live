@@ -1,5 +1,13 @@
 Deployed at <https://swyx-tripplanner.herokuapp.com/>
 
+Stack:
+- Node
+- Express
+- Sequelize/pg
+- Mapbox
+- Bootstrap
+- webpack
+
 # FSA Trip Planner (Live)
 
 Trip Planner is a Single Page Application:
