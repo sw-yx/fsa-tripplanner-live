@@ -7,6 +7,8 @@ var Place = require("./models").Place;
 var Hotel = require("./models").Hotel;
 var Restaurant = require("./models").Restaurant;
 var Activity = require("./models").Activity;
+var Itinerary = require("./models").Itinerary;
+var Day = require("./models").Day;
 
 var data = {
   hotel: [
@@ -539,6 +541,28 @@ var data = {
       },
       age_range: "All"
     }
+  ],
+  itinerary: [ // array of days
+    {
+      name: 'JacksonAwesomeTrip',
+      days: [{
+        hotels: [2],
+        restaurants: [3, 4],
+        activities: [5],
+      },{
+        hotels: [3],
+        restaurants: [1, 2],
+        activities: [3],
+      }]
+    }, 
+    {
+      name: 'SwyxAwesomeTrip',
+      days: [{
+        hotels: [1],
+        restaurants: [2, 3],
+        activities: [5],
+      }]
+    }
   ]
 };
 
@@ -548,9 +572,18 @@ db
     console.log("Dropped old data, now inserting data");
     return Promise.map(Object.keys(data), function(name) {
       return Promise.map(data[name], function(item) {
-        return db.model(name).create(item, {
-          include: [Place]
-        });
+        if (name == 'itinerary') {
+          console.log('itinerary', item)
+          return db.model(name).create(item, {
+            include: [Day]
+          })
+        }
+        else {
+          console.log('nonitinerary', item)
+          return db.model(name).create(item, {
+            include: [Place]
+          });
+        }
       });
     });
   })
