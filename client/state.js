@@ -50,6 +50,9 @@ Plan.prototype.removeDay = function () {
 Plan.prototype.switchDays = function (idx) {
     this.currentday = idx
 }
+Plan.prototype.getCurDay = function() {
+    return this.days[this.currentday]
+}
 
 
 module.exports = {State, Plan}  //, days}
