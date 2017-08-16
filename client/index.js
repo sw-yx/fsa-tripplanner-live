@@ -1,6 +1,6 @@
 const mapboxgl = require("mapbox-gl");
 const buildMarker = require("./marker");
-const state = require('./state');
+const {State, Plan} = require('./state');
 
 /*
   * Instantiate the Map
@@ -25,6 +25,7 @@ var mapData = function (data, targetElement) {
     })
 }
 var globalstore = {}
+var plan = new Plan()
 
 var el = x => document.getElementById(x)
 
@@ -57,13 +58,8 @@ var makePopupHTML = (placetype, selectedObj) => {
     return popupHTML
 }
 
-var setListeners = function(Placetype) {
-  var placetype = Placetype.toLowerCase()
-  // add a new place
-  el(placetype + '-add').addEventListener('click', () => {
-    var selectedChoice = el(placetype + '-choices').value // position in the array, not really the placeId
-    var selectedObj = globalstore[Placetype][selectedChoice]
-    if (state.addPlace(placetype, selectedChoice)) {
+function addPlaceDiv(selectedObj, selectedChoice, placetype){
+  if (plan.addPlaceToCurrentDay(placetype, selectedChoice)) {
       var temp = document.createElement('li')
       temp.className = 'list-group-item';
 
@@ -85,14 +81,50 @@ var setListeners = function(Placetype) {
       button.onclick = function(){
         temp.remove();
         newmarker.remove();
-        state.removePlace(placetype, selectedChoice)
+        plan.removePlaceFromCurrentDay(placetype, selectedChoice)
         map.flyTo({center: selectedObj.place.location, zoom: 13, curve: 2, speed: 0.5});
       }
       //fly to the new marker once done
-      map.flyTo({center: selectedObj.place.location, zoom: 15, curve: 2, speed: 0.5});
     }
+}
+
+var setListeners = function(Placetype) {
+  var placetype = Placetype.toLowerCase()
+  // add a new place
+  el(placetype + '-add').addEventListener('click', () => {
+    var selectedChoice = el(placetype + '-choices').value // position in the array, not really the placeId
+    var selectedObj = globalstore[Placetype][selectedChoice]
+    addPlaceDiv(selectedObj, selectedChoice, placetype);
+    map.flyTo({center: selectedObj.place.location, zoom: 15, curve: 2, speed: 0.5});
   })
 }
+
+function renderDay(){
+  el('myStuff').innerHTML = `<div>
+              <h4>My Hotel</h4>
+              <ul class="list-group" id="hotels-list">
+
+              </ul>
+            </div>
+            <div>
+              <h4>My Restaurants</h4>
+              <ul class="list-group" id="restaurants-list">
+
+              </ul>
+            </div>
+            <div>
+              <h4>My Activities</h4>
+              <ul class="list-group" id="activities-list">
+
+              </ul>
+            </div>`;
+  var planThing = plan.days[plan.currentday]
+  for (var place in {hotels: 'hotels', restaurants: 'restaurants', activities: 'activities'}){
+    console.log(planThing[place]);
+  }
+}
+
+renderDay();
 // ['Hotels', 'Restaurants', 'Activities'].forEach(x => setListeners(x))
 setListeners('Hotels')
 setListeners('Restaurants')

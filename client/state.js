@@ -28,7 +28,7 @@ function Plan() {
 }
 
 Plan.prototype.addPlaceToCurrentDay = function (varname, placeId) {
-    this.days[this.currentday].addPlace(varname, placeId)
+    return this.days[this.currentday].addPlace(varname, placeId)
 }
 Plan.prototype.removePlaceFromCurrentDay = function (varname, placeId) {
     this.days[this.currentday].removePlace(varname, placeId)

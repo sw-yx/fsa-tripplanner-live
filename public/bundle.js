@@ -537,7 +537,7 @@ module.exports = __webpack_require__(6);
 
 const mapboxgl = __webpack_require__(0);
 const buildMarker = __webpack_require__(4);
-const state = __webpack_require__(5);
+const {State, Plan} = __webpack_require__(5);
 
 /*
   * Instantiate the Map
@@ -562,6 +562,7 @@ var mapData = function (data, targetElement) {
     })
 }
 var globalstore = {}
+var plan = new Plan()
 
 var el = x => document.getElementById(x)
 
@@ -594,13 +595,8 @@ var makePopupHTML = (placetype, selectedObj) => {
     return popupHTML
 }
 
-var setListeners = function(Placetype) {
-  var placetype = Placetype.toLowerCase()
-  // add a new place
-  el(placetype + '-add').addEventListener('click', () => {
-    var selectedChoice = el(placetype + '-choices').value // position in the array, not really the placeId
-    var selectedObj = globalstore[Placetype][selectedChoice]
-    if (state.addPlace(placetype, selectedChoice)) {
+function addPlaceDiv(selectedObj, selectedChoice, placetype){
+  if (plan.addPlaceToCurrentDay(placetype, selectedChoice)) {
       var temp = document.createElement('li')
       temp.className = 'list-group-item';
 
@@ -622,14 +618,50 @@ var setListeners = function(Placetype) {
       button.onclick = function(){
         temp.remove();
         newmarker.remove();
-        state.removePlace(placetype, selectedChoice)
+        plan.removePlaceFromCurrentDay(placetype, selectedChoice)
         map.flyTo({center: selectedObj.place.location, zoom: 13, curve: 2, speed: 0.5});
       }
       //fly to the new marker once done
-      map.flyTo({center: selectedObj.place.location, zoom: 15, curve: 2, speed: 0.5});
     }
+}
+
+var setListeners = function(Placetype) {
+  var placetype = Placetype.toLowerCase()
+  // add a new place
+  el(placetype + '-add').addEventListener('click', () => {
+    var selectedChoice = el(placetype + '-choices').value // position in the array, not really the placeId
+    var selectedObj = globalstore[Placetype][selectedChoice]
+    addPlaceDiv(selectedObj, selectedChoice, placetype);
+    map.flyTo({center: selectedObj.place.location, zoom: 15, curve: 2, speed: 0.5});
   })
 }
+
+function renderDay(){
+  el('myStuff').innerHTML = `<div>
+              <h4>My Hotel</h4>
+              <ul class="list-group" id="hotels-list">
+
+              </ul>
+            </div>
+            <div>
+              <h4>My Restaurants</h4>
+              <ul class="list-group" id="restaurants-list">
+
+              </ul>
+            </div>
+            <div>
+              <h4>My Activities</h4>
+              <ul class="list-group" id="activities-list">
+
+              </ul>
+            </div>`;
+  var planThing = plan.days[plan.currentday]
+  for (var place in {hotels: 'hotels', restaurants: 'restaurants', activities: 'activities'}){
+    console.log(planThing[place]);
+  }
+}
+
+renderDay();
 // ['Hotels', 'Restaurants', 'Activities'].forEach(x => setListeners(x))
 setListeners('Hotels')
 setListeners('Restaurants')
@@ -704,31 +736,61 @@ module.exports = buildMarker;
 /* 5 */
 /***/ (function(module, exports) {
 
-const state = {
-  hotels: [],
-  restaurants: [],
-  activities: []
-};
+function State() {
+    this.hotels = []
+    this.restaurants = []
+    this.activities = []
+}
 
-state.addPlace = function (varname, placeId) {
-    if (!state[varname].includes(placeId)) {
-        state[varname].push(placeId)
+State.prototype.addPlace = function (varname, placeId) {
+    if (!this[varname].includes(placeId)) {
+        this[varname].push(placeId)
         return true
     } else return false
 }
-state.removePlace = function (varname, placeId) {
-    if (state[varname].includes(placeId)) {
-        state[varname].splice(state[varname].indexOf(placeId),1)
+State.prototype.removePlace = function (varname, placeId) {
+    if (this[varname].includes(placeId)) {
+        this[varname].splice(this[varname].indexOf(placeId),1)
     }
 }
 
-state.clearState = function (){
-    state.hotels = []
-    state.restaurants = []
-    state.activities = []
+State.prototype.clearState = function (){
+    this.hotels = []
+    this.restaurants = []
+    this.activities = []
 }
 
-module.exports = state
+function Plan() {
+    this.days = [new State()]
+    this.currentday = 0
+}
+
+Plan.prototype.addPlaceToCurrentDay = function (varname, placeId) {
+    return this.days[this.currentday].addPlace(varname, placeId)
+}
+Plan.prototype.removePlaceFromCurrentDay = function (varname, placeId) {
+    this.days[this.currentday].removePlace(varname, placeId)
+}
+Plan.prototype.resetDays = function () {
+    this.days = [new State()]
+    this.currentday = 0
+}
+
+Plan.prototype.addNewDay = function () {
+    this.days.push(new State())
+    this.currentday += 1
+}
+
+Plan.prototype.removeDay = function () {
+    this.days.splice(this.currentday, 1)
+    this.currentday -= 1
+}
+Plan.prototype.switchDays = function (idx) {
+    this.currentday = idx
+}
+
+
+module.exports = {State, Plan}  //, days}
 
 /***/ }),
 /* 6 */
