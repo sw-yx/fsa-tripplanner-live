@@ -28,6 +28,7 @@ var mapData = function (data, targetElement) {
 }
 var globalstore = {}
 var plan = new Plan()
+var currentmarkers = []
 
 fetch('/api/all')
   .then(result => result.json())
@@ -55,6 +56,7 @@ function addPlaceDiv(selectedChoice, Placetype){
     var newmarker = buildMarker(placetype, selectedObj.place.location)
     newmarker.setPopup(makePopup(placetype, selectedObj)) // make popup
     newmarker.addTo(map)
+    currentmarkers.push(newmarker)
     // make removal possible
     button.onclick = function(){
       temp.remove();
@@ -91,6 +93,8 @@ function renderDay(dayplan){
 }
 
 function renderPlan(){
+  currentmarkers.forEach(x => x.remove())
+  currentmarkers = []
   el('day-container').innerHTML=''
   plan.days.forEach((x, i) => {
     var temp = document.createElement('button')

@@ -528,7 +528,7 @@ module.exports={"$version":8,"$root":{"version":{"required":true,"type":"enum","
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(2);
-module.exports = __webpack_require__(6);
+module.exports = __webpack_require__(8);
 
 
 /***/ }),
@@ -537,8 +537,8 @@ module.exports = __webpack_require__(6);
 
 const mapboxgl = __webpack_require__(0);
 const buildMarker = __webpack_require__(4);
-const makePopup = __webpack_require__(8);
-const {State, Plan} = __webpack_require__(5);
+const makePopup = __webpack_require__(5);
+const {State, Plan} = __webpack_require__(6);
 
 var el = x => document.getElementById(x) // just a helper function
 /*
@@ -565,6 +565,7 @@ var mapData = function (data, targetElement) {
 }
 var globalstore = {}
 var plan = new Plan()
+var currentmarkers = []
 
 fetch('/api/all')
   .then(result => result.json())
@@ -592,6 +593,7 @@ function addPlaceDiv(selectedChoice, Placetype){
     var newmarker = buildMarker(placetype, selectedObj.place.location)
     newmarker.setPopup(makePopup(placetype, selectedObj)) // make popup
     newmarker.addTo(map)
+    currentmarkers.push(newmarker)
     // make removal possible
     button.onclick = function(){
       temp.remove();
@@ -628,6 +630,8 @@ function renderDay(dayplan){
 }
 
 function renderPlan(){
+  currentmarkers.forEach(x => x.remove())
+  currentmarkers = []
   el('day-container').innerHTML=''
   plan.days.forEach((x, i) => {
     var temp = document.createElement('button')
@@ -726,6 +730,37 @@ module.exports = buildMarker;
 
 /***/ }),
 /* 5 */
+/***/ (function(module, exports, __webpack_require__) {
+
+const mapboxgl = __webpack_require__(0);
+
+var makePopupHTML = (Placetype, selectedObj) => {
+    var popupHTML = `<h3>${selectedObj.name}</h3>`;
+    popupHTML += `<p>Address: ${selectedObj.place.address}</p>`;
+    switch (Placetype) {
+      case 'Hotels':
+        popupHTML += `<p>Stars: ${selectedObj.num_stars}</p>`;
+        popupHTML += `<p>Amenities: ${selectedObj.amenities}</p>`;
+        break;
+      case 'Restaurants':
+        popupHTML += `<p>Cuisine: ${selectedObj.cuisine}</p>`;
+        popupHTML += `<p>Price: ${Array(selectedObj.price).join('$')}$</p>`;
+        break;
+      default: // Activities
+        popupHTML += `<p>Age Range: ${selectedObj.age_range}</p>`;
+        break;
+    }
+    return popupHTML
+}
+
+function makePopup(placetype, selectedObj) {
+    return new mapboxgl.Popup({offset: 25})
+          .setHTML(makePopupHTML(placetype, selectedObj))
+}
+module.exports = makePopup
+
+/***/ }),
+/* 6 */
 /***/ (function(module, exports) {
 
 function State() {
@@ -788,12 +823,6 @@ Plan.prototype.getCurDay = function() {
 module.exports = {State, Plan}  //, days}
 
 /***/ }),
-/* 6 */
-/***/ (function(module, exports) {
-
-// removed by extract-text-webpack-plugin
-
-/***/ }),
 /* 7 */
 /***/ (function(module, exports) {
 
@@ -813,34 +842,9 @@ for (var i = 0; i < inputs.length; i++) {
 
 /***/ }),
 /* 8 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, exports) {
 
-const mapboxgl = __webpack_require__(0);
-
-var makePopupHTML = (Placetype, selectedObj) => {
-    var popupHTML = `<h3>${selectedObj.name}</h3>`;
-    popupHTML += `<p>Address: ${selectedObj.place.address}</p>`;
-    switch (Placetype) {
-      case 'Hotels':
-        popupHTML += `<p>Stars: ${selectedObj.num_stars}</p>`;
-        popupHTML += `<p>Amenities: ${selectedObj.amenities}</p>`;
-        break;
-      case 'Restaurants':
-        popupHTML += `<p>Cuisine: ${selectedObj.cuisine}</p>`;
-        popupHTML += `<p>Price: ${Array(selectedObj.price).join('$')}$</p>`;
-        break;
-      default: // Activities
-        popupHTML += `<p>Age Range: ${selectedObj.age_range}</p>`;
-        break;
-    }
-    return popupHTML
-}
-
-function makePopup(placetype, selectedObj) {
-    return new mapboxgl.Popup({offset: 25})
-          .setHTML(makePopupHTML(placetype, selectedObj))
-}
-module.exports = makePopup
+// removed by extract-text-webpack-plugin
 
 /***/ })
 /******/ ]);
