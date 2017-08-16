@@ -4,15 +4,19 @@
   "description": "",
   "scripts": {
     "start:dev": "webpack -w & nodemon server/app.js",
-    "start": "node server/app.js"
+    "start": "node server/app.js",
+    "test": "mocha -w test/*.spec.js"
   },
   "license": "MIT",
   "dependencies": {
     "bluebird": "^3.5.0",
     "body-parser": "^1.17.2",
     "bootstrap": "^3.3.5",
+    "chai": "^4.1.1",
+    "chai-spies": "^0.7.1",
     "express": "^4.15.4",
     "mapbox-gl": "^0.39.1",
+    "mocha": "^3.5.0",
     "morgan": "^1.8.2",
     "pg": "^4.5.7",
     "pg-hstore": "^2.3.2",

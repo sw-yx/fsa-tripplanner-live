@@ -1,5 +1,6 @@
 const mapboxgl = require("mapbox-gl");
 const buildMarker = require("./marker");
+const state = require('./state');
 
 /*
   * Instantiate the Map
@@ -56,35 +57,46 @@ var makePopupHTML = (placetype, selectedObj) => {
     return popupHTML
 }
 
-var setListeners = function(placetype) {
-  el(placetype.toLowerCase() + '-add').addEventListener('click', () => {
-    var selectedChoice = el(placetype.toLowerCase() + '-choices').value
-    var selectedObj = globalstore[placetype][selectedChoice]
-    var temp = document.createElement('li')
-    temp.className = 'list-group-item';
-    var button = document.createElement('button');
-    button.append('x');
-    button.className = 'btn btn-sm btn-danger pull-right reallysmallbtn';
-    temp.append(selectedObj.name);
-    temp.append(button);
-    el(placetype.toLowerCase() + '-list').append(temp)
-    var newmarker = buildMarker(placetype.toLowerCase(), selectedObj.place.location)
-    // make popup
-    var popup = new mapboxgl.Popup({offset: 25})
-        .setHTML(makePopupHTML(placetype, selectedObj))
-    newmarker.setPopup(popup)
-    newmarker.addTo(map)
-    // make removal possible
-    button.onclick = function(){
-      temp.remove();
-      newmarker.remove();
-      map.flyTo({center: selectedObj.place.location, zoom: 13, curve: 2, speed: 0.5});
+var setListeners = function(Placetype) {
+  var placetype = Placetype.toLowerCase()
+  // add a new place
+  el(placetype + '-add').addEventListener('click', () => {
+    var selectedChoice = el(placetype + '-choices').value // position in the array, not really the placeId
+    var selectedObj = globalstore[Placetype][selectedChoice]
+    if (state.addPlace(placetype, selectedChoice)) {
+      var temp = document.createElement('li')
+      temp.className = 'list-group-item';
+
+      //make the button to remove the selected place
+      var button = document.createElement('button');
+      button.append('x');
+      button.className = 'btn btn-sm btn-danger pull-right reallysmallbtn';
+      temp.append(selectedObj.name);
+      temp.append(button);
+      el(placetype + '-list').append(temp)
+      var newmarker = buildMarker(placetype, selectedObj.place.location)
+
+      // make popup
+      var popup = new mapboxgl.Popup({offset: 25})
+          .setHTML(makePopupHTML(placetype, selectedObj))
+      newmarker.setPopup(popup)
+      newmarker.addTo(map)
+      // make removal possible
+      button.onclick = function(){
+        temp.remove();
+        newmarker.remove();
+        state.removePlace(placetype, selectedChoice)
+        map.flyTo({center: selectedObj.place.location, zoom: 13, curve: 2, speed: 0.5});
+      }
+      //fly to the new marker once done
+      map.flyTo({center: selectedObj.place.location, zoom: 15, curve: 2, speed: 0.5});
     }
-    //fly to the new marker once done
-    map.flyTo({center: selectedObj.place.location, zoom: 15, curve: 2, speed: 0.5});
   })
 }
-['Hotels', 'Restaurants', 'Activities'].forEach(x => setListeners(x))
+// ['Hotels', 'Restaurants', 'Activities'].forEach(x => setListeners(x))
+setListeners('Hotels')
+setListeners('Restaurants')
+setListeners('Activities')
 
 // START https://www.mapbox.com/mapbox-gl-js/example/setstyle/
 var layerList = document.getElementById('menu');

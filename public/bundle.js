@@ -528,7 +528,7 @@ module.exports={"$version":8,"$root":{"version":{"required":true,"type":"enum","
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(2);
-module.exports = __webpack_require__(5);
+module.exports = __webpack_require__(6);
 
 
 /***/ }),
@@ -537,6 +537,7 @@ module.exports = __webpack_require__(5);
 
 const mapboxgl = __webpack_require__(0);
 const buildMarker = __webpack_require__(4);
+const state = __webpack_require__(5);
 
 /*
   * Instantiate the Map
@@ -593,35 +594,46 @@ var makePopupHTML = (placetype, selectedObj) => {
     return popupHTML
 }
 
-var setListeners = function(placetype) {
-  el(placetype.toLowerCase() + '-add').addEventListener('click', () => {
-    var selectedChoice = el(placetype.toLowerCase() + '-choices').value
-    var selectedObj = globalstore[placetype][selectedChoice]
-    var temp = document.createElement('li')
-    temp.className = 'list-group-item';
-    var button = document.createElement('button');
-    button.append('x');
-    button.className = 'btn btn-sm btn-danger pull-right reallysmallbtn';
-    temp.append(selectedObj.name);
-    temp.append(button);
-    el(placetype.toLowerCase() + '-list').append(temp)
-    var newmarker = buildMarker(placetype.toLowerCase(), selectedObj.place.location)
-    // make popup
-    var popup = new mapboxgl.Popup({offset: 25})
-        .setHTML(makePopupHTML(placetype, selectedObj))
-    newmarker.setPopup(popup)
-    newmarker.addTo(map)
-    // make removal possible
-    button.onclick = function(){
-      temp.remove();
-      newmarker.remove();
-      map.flyTo({center: selectedObj.place.location, zoom: 13, curve: 2, speed: 0.5});
+var setListeners = function(Placetype) {
+  var placetype = Placetype.toLowerCase()
+  // add a new place
+  el(placetype + '-add').addEventListener('click', () => {
+    var selectedChoice = el(placetype + '-choices').value // position in the array, not really the placeId
+    var selectedObj = globalstore[Placetype][selectedChoice]
+    if (state.addPlace(placetype, selectedChoice)) {
+      var temp = document.createElement('li')
+      temp.className = 'list-group-item';
+
+      //make the button to remove the selected place
+      var button = document.createElement('button');
+      button.append('x');
+      button.className = 'btn btn-sm btn-danger pull-right reallysmallbtn';
+      temp.append(selectedObj.name);
+      temp.append(button);
+      el(placetype + '-list').append(temp)
+      var newmarker = buildMarker(placetype, selectedObj.place.location)
+
+      // make popup
+      var popup = new mapboxgl.Popup({offset: 25})
+          .setHTML(makePopupHTML(placetype, selectedObj))
+      newmarker.setPopup(popup)
+      newmarker.addTo(map)
+      // make removal possible
+      button.onclick = function(){
+        temp.remove();
+        newmarker.remove();
+        state.removePlace(placetype, selectedChoice)
+        map.flyTo({center: selectedObj.place.location, zoom: 13, curve: 2, speed: 0.5});
+      }
+      //fly to the new marker once done
+      map.flyTo({center: selectedObj.place.location, zoom: 15, curve: 2, speed: 0.5});
     }
-    //fly to the new marker once done
-    map.flyTo({center: selectedObj.place.location, zoom: 15, curve: 2, speed: 0.5});
   })
 }
-['Hotels', 'Restaurants', 'Activities'].forEach(x => setListeners(x))
+// ['Hotels', 'Restaurants', 'Activities'].forEach(x => setListeners(x))
+setListeners('Hotels')
+setListeners('Restaurants')
+setListeners('Activities')
 
 // START https://www.mapbox.com/mapbox-gl-js/example/setstyle/
 var layerList = document.getElementById('menu');
@@ -690,6 +702,36 @@ module.exports = buildMarker;
 
 /***/ }),
 /* 5 */
+/***/ (function(module, exports) {
+
+const state = {
+  hotels: [],
+  restaurants: [],
+  activities: []
+};
+
+state.addPlace = function (varname, placeId) {
+    if (!state[varname].includes(placeId)) {
+        state[varname].push(placeId)
+        return true
+    } else return false
+}
+state.removePlace = function (varname, placeId) {
+    if (state[varname].includes(placeId)) {
+        state[varname].splice(state[varname].indexOf(placeId),1)
+    }
+}
+
+state.clearState = function (){
+    state.hotels = []
+    state.restaurants = []
+    state.activities = []
+}
+
+module.exports = state
+
+/***/ }),
+/* 6 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
