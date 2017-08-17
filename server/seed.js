@@ -573,13 +573,11 @@ db
     return Promise.map(Object.keys(data), function(name) {
       return Promise.map(data[name], function(item) {
         if (name == 'itinerary') {
-          console.log('itinerary', item)
           return db.model(name).create(item, {
             include: [Day]
           })
         }
         else {
-          console.log('nonitinerary', item)
           return db.model(name).create(item, {
             include: [Place]
           });
